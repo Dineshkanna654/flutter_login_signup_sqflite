@@ -1,7 +1,59 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+
+class DatabaseHelper {
+  static Database? _database;
+  static const String _tableName = 'users';
+
+  Future<Database> get database async {
+    if (_database != null) {
+      return _database!;
+    }
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  Future<Database> _initDatabase() async {
+    String path = join(await getDatabasesPath(), 'database.db');
+    return openDatabase(
+      path,
+      version: 1,
+      onCreate: (db, version) async {
+        await db.execute('''
+          CREATE TABLE $_tableName(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            password TEXT
+          )
+        ''');
+      },
+    );
+  }
+
+  Future<int> insertUser(String username, String password) async {
+    final db = await database;
+    return await db.insert(
+      _tableName,
+      {'username': username, 'password': password},
+    );
+  }
+
+  Future<bool> loginUser(String username, String password) async {
+    final db = await database;
+    var result = await db.query(
+      _tableName,
+      where: 'username = ? AND password = ?',
+      whereArgs: [username, password],
+    );
+    return result.isNotEmpty;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -59,18 +111,18 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Username',
               ),
             ),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Password',
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Implement login logic here
@@ -79,18 +131,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 // Call a function to validate login credentials and navigate to the next screen if successful
                 _login(username, password);
               },
-              child: Text('Login'),
+              child: const Text('Login'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextButton(
               onPressed: () {
                 // Navigate to the signup screen
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SignupScreen()),
+                  MaterialPageRoute(builder: (context) => const SignupScreen()),
                 );
               },
-              child: Text('Create an account'),
+              child: const Text('Create an account'),
             ),
           ],
         ),
@@ -99,42 +151,39 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _login(String username, String password) {
-    // Implement your login logic here
-    // You can use the DatabaseHelper class to validate credentials
-    // Once validated, you can navigate to the next screen
   }
 }
 
 class SignupScreen extends StatelessWidget {
+  const SignupScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign Up'),
+        title: const Text('Sign Up'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             // Add text fields for signup (similar to login)
-            TextField(
+            const TextField(
               decoration: InputDecoration(
                 labelText: 'Username',
               ),
             ),
-            TextField(
+            const TextField(
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Implement signup logic here
-                // You can use the DatabaseHelper class to insert new user data
               },
-              child: Text('Sign Up'),
+              child: const Text('Sign Up'),
             ),
           ],
         ),
