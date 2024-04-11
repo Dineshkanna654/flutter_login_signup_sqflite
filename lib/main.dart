@@ -150,7 +150,39 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _login(String username, String password) {
+  void _login(String username, String password) async {
+  bool isLoggedIn = await DatabaseHelper().loginUser(username, password);
+  if (isLoggedIn) {
+    // Navigate to the home page if login is successful
+    Navigator.push(
+      context as BuildContext,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+    );
+  } else {
+    // Show an error message
+    ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+      const SnackBar(
+        content: Text('Login failed. Please check your credentials.'),
+      ),
+    );
+  }
+}
+
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home Page'),
+      ),
+      body: const Center(
+        child: Text('Welcome to the Home Page!'),
+      ),
+    );
   }
 }
 
@@ -169,6 +201,7 @@ class SignupScreen extends StatelessWidget {
           children: <Widget>[
             // Add text fields for signup (similar to login)
             const TextField(
+              controller: _usernameController,
               decoration: InputDecoration(
                 labelText: 'Username',
               ),
@@ -182,6 +215,9 @@ class SignupScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
+                String username = _usernameController.text;
+                String password = _passwordController.text;
+                _signup(username, password);
               },
               child: const Text('Sign Up'),
             ),
@@ -190,4 +226,25 @@ class SignupScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _signup(String username, String password) async {
+  int result = await DatabaseHelper().insertUser(username, password);
+  if (result != -1) {
+    // Show a success message
+    ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+      const SnackBar(
+        content: Text('User successfully registered!'),
+      ),
+    );
+  } else {
+    // Show an error message
+    ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+      const SnackBar(
+        content: Text('Failed to register user. Please try again.'),
+      ),
+    );
+  }
 }
+
+}
+
