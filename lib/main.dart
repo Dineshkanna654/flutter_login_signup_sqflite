@@ -168,9 +168,12 @@ class SignupScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             // Add text fields for signup (similar to login)
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Username',
+            Padding(
+              padding: EdgeInsets.all(50),
+              child: const TextField(
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                ),
               ),
             ),
             const TextField(
@@ -183,7 +186,7 @@ class SignupScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
               },
-              child: const Text('Sign Up'),
+              child: const Text('SignUp'),
             ),
           ],
         ),
